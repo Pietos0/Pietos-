@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pietos - Document Verification</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+        }
+        
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo {
+            height: 52px;
+            width: auto;
+        }
+        
+        .main-content {
+            padding: 40px 0;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+        
+        .verification-options {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-top: 50px;
+        }
+        
+        .verification-card {
+            width: 250px;
+            height: 250px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            perspective: 1000px;
+        }
+        
+        .verification-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .card-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+            color: #3498db;
+        }
+        
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .card-description {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            padding: 0 20px;
+        }
+        
+        /* 3D Animation */
+        .verification-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(52, 152, 219, 0.1), rgba(46, 204, 113, 0.1));
+            transform: rotateY(90deg);
+            transform-origin: left;
+            transition: transform 0.5s;
+            z-index: -1;
+        }
+        
+        .verification-card:hover::before {
+            transform: rotateY(0deg);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            animation: modalFadeIn 0.3s;
+        }
+        
+        @keyframes modalFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+        }
+        
+        .close-btn {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #7f8c8d;
+            background: none;
+            border: none;
+        }
+        
+        .modal-body {
+            margin-bottom: 20px;
+        }
+        
+        .consent-text {
+            margin-bottom: 20px;
+            line-height: 1.6;
+            color: #555;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .verify-btn {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .verify-btn:hover {
+            background-color: #2980b9;
+        }
+        
+        .verify-btn:disabled {
+            background-color: #95a5a6;
+            cursor: not-allowed;
+        }
+        
+        /* Aadhaar Details Modal */
+        .aadhaar-details {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #eee;
+        }
+        
+        .aadhaar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .aadhaar-title {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        
+        .aadhaar-logo {
+            height: 30px;
+        }
+        
+        .aadhaar-number {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-family: monospace;
+            letter-spacing: 2px;
+            margin-bottom: 15px;
+            border: 1px dashed #ccc;
+        }
+        
+        .detail-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+        
+        .detail-label {
+            font-weight: bold;
+            width: 120px;
+            color: #555;
+        }
+        
+        .detail-value {
+            flex: 1;
+        }
+        
+        .success-message {
+            text-align: center;
+            padding: 20px;
+            background-color: #e8f8f5;
+            border-radius: 5px;
+            margin-top: 20px;
+            color: #27ae60;
+        }
+        
+        .success-icon {
+            font-size: 50px;
+            color: #2ecc71;
+            margin-bottom: 15px;
+        }
+        
+        /* Auto-run animation */
+        @keyframes cardFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        
+        .verification-card {
+            animation: cardFloat 6s infinite;
+        }
+        
+        footer {
+            background-color: #2c3e50;
+            color: white;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 50px;
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            display: none;
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 5px;
+            display: none;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo-container">
+                <img src="https://pietos.com/wp-content/uploads/2020/08/Untitled-design-3-180x52.png" alt="Pietos Logo" class="logo">
+            </div>
+        </div>
+    </header>
+    
+    <section class="main-content">
+        <div class="container">
+            <h1>Document Verification</h1>
+            <p>Select a document to verify your identity</p>
+            
+            <div class="verification-options">
+                <div class="verification-card" id="aadhaar-card">
+                    <div class="card-icon">
+                        <i class="fas fa-id-card"></i>
+                    </div>
+                    <div class="card-title">Aadhaar</div>
+                    <div class="card-description">Verify your identity Via Digilocker</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Aadhaar Verification Modal - Step 1 -->
+    <div class="modal" id="aadhaar-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Aadhaar Verification</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="consent-text">
+                    <p>To verify your Aadhaar, please provide your email or mobile number linked with Aadhaar. We'll send you a consent link to proceed with the verification.</p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="user-email">Email ID</label>
+                    <input type="email" id="user-email" placeholder="Enter your email">
+                    <div class="error-message" id="email-error">Please enter a valid email address</div>
+                </div>
+                
+                <div style="text-align: center; margin: 15px 0; font-weight: bold;">OR</div>
+                
+                <div class="form-group">
+                    <label for="user-mobile">Mobile Number</label>
+                    <input type="tel" id="user-mobile" placeholder="Enter your mobile number" maxlength="10">
+                    <div class="error-message" id="mobile-error">Please enter a valid 10-digit mobile number</div>
+                </div>
+                
+                <button class="verify-btn" id="send-consent-btn">Send Consent Link</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Aadhaar Verification Modal - Step 2 (Consent) -->
+    <div class="modal" id="consent-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Consent Received</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="spinner" id="consent-spinner"></div>
+                <div id="consent-content">
+                    <div class="consent-text">
+                        <p>You'll now be redirected to Digilocker for Aadhaar verification. Please login and share your consent to proceed.</p>
+                        <p>Your data will be securely processed and not stored beyond the verification process.</p>
+                    </div>
+                    <button class="verify-btn" id="redirect-digilocker">Proceed to Digilocker</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Aadhaar Verification Modal - Step 3 (Details) -->
+    <div class="modal" id="details-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Aadhaar Verification</h2>
+                <button class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="success-message">
+                    <div class="success-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Verification Successful</h3>
+                    <p>Your Aadhaar details have been successfully verified</p>
+                </div>
+                
+                <div class="aadhaar-details">
+                    <div class="aadhaar-header">
+                        <div class="aadhaar-title">Aadhaar Details</div>
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/c/cf/Aadhaar_Logo.svg/1200px-Aadhaar_Logo.svg.png" alt="Aadhaar Logo" class="aadhaar-logo" style="height: 30px;">
+                    </div>
+                    
+                    <div class="aadhaar-number">XXXX XXXX 7890</div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Full Name:</div>
+                        <div class="detail-value">Robert Johnson</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Date of Birth:</div>
+                        <div class="detail-value">15/07/1985</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Gender:</div>
+                        <div class="detail-value">Male</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Father's Name:</div>
+                        <div class="detail-value">David Johnson</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Mobile:</div>
+                        <div class="detail-value">98XXXXXX90</div>
+                    </div>
+                    
+                    <div class="detail-row">
+                        <div class="detail-label">Address:</div>
+                        <div class="detail-value">123, Main Street, Bangalore, Karnataka - 560001</div>
+                    </div>
+                </div>
+                
+                <button class="verify-btn" id="close-details-btn">Done</button>
+            </div>
+        </div>
+    </div>
+    
+    <footer>
+        <div class="container">
+            <p>&copy; 2025 Pietos. All rights reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Replace this with your actual Google Apps Script URL
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzSIu_8Q2HLVWVWAexqnyH5BTb5uQL1JemC8aoSk7sL3m61HbEP6sOiOU0-sZHXKRn_Ow/exec';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get elements
+            const aadhaarCard = document.getElementById('aadhaar-card');
+            const aadhaarModal = document.getElementById('aadhaar-modal');
+            const consentModal = document.getElementById('consent-modal');
+            const detailsModal = document.getElementById('details-modal');
+            const closeBtns = document.querySelectorAll('.close-btn');
+            const sendConsentBtn = document.getElementById('send-consent-btn');
+            const redirectDigilockerBtn = document.getElementById('redirect-digilocker');
+            const closeDetailsBtn = document.getElementById('close-details-btn');
+            const userEmail = document.getElementById('user-email');
+            const userMobile = document.getElementById('user-mobile');
+            const consentSpinner = document.getElementById('consent-spinner');
+            const consentContent = document.getElementById('consent-content');
+            const emailError = document.getElementById('email-error');
+            const mobileError = document.getElementById('mobile-error');
+            
+            // Open Aadhaar modal when card is clicked
+            aadhaarCard.addEventListener('click', function() {
+                aadhaarModal.style.display = 'flex';
+            });
+            
+            // Close modals when X is clicked
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const modal = this.closest('.modal');
+                    modal.style.display = 'none';
+                });
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target.classList.contains('modal')) {
+                    event.target.style.display = 'none';
+                }
+            });
+            
+            // Validate email or mobile before sending consent
+            sendConsentBtn.addEventListener('click', function() {
+                const email = userEmail.value.trim();
+                const mobile = userMobile.value.trim();
+                
+                // Reset error messages
+                emailError.style.display = 'none';
+                mobileError.style.display = 'none';
+                
+                if (!email && !mobile) {
+                    emailError.style.display = 'block';
+                    mobileError.style.display = 'block';
+                    return;
+                }
+                
+                if (mobile && !/^\d{10}$/.test(mobile)) {
+                    mobileError.style.display = 'block';
+                    return;
+                }
+                
+                if (email && !/^\S+@\S+\.\S+$/.test(email)) {
+                    emailError.style.display = 'block';
+                    return;
+                }
+                
+                // Show loading in consent modal
+                aadhaarModal.style.display = 'none';
+                consentModal.style.display = 'flex';
+                consentSpinner.style.display = 'block';
+                consentContent.style.display = 'none';
+                
+                // Send data to Google Apps Script
+                const formData = new FormData();
+                formData.append('email', email);
+                formData.append('mobile', mobile);
+                formData.append('action', 'send_consent');
+                
+                fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Show success message
+                        consentSpinner.style.display = 'none';
+                        consentContent.style.display = 'block';
+                    } else {
+                        alert('Error sending consent link: ' + data.message);
+                        consentModal.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error sending consent link. Please try again.');
+                    consentModal.style.display = 'none';
+                });
+            });
+            
+            // Redirect to Digilocker
+            redirectDigilockerBtn.addEventListener('click', function() {
+                // Open DigiLocker authorization in a new window
+                const authWindow = window.open(getAuthorizationUrl(), '_blank');
+                
+                // Show the details modal after a delay (simulating verification)
+                consentModal.style.display = 'none';
+                
+                // Show loading spinner
+                const spinner = document.createElement('div');
+                spinner.className = 'spinner';
+                spinner.style.display = 'block';
+                detailsModal.querySelector('.modal-body').prepend(spinner);
+                detailsModal.querySelector('.success-message').style.display = 'none';
+                detailsModal.querySelector('.aadhaar-details').style.display = 'none';
+                detailsModal.style.display = 'flex';
+                
+                // Check if the auth window is closed (user completed the process)
+                const checkAuthWindow = setInterval(function() {
+                    if (authWindow.closed) {
+                        clearInterval(checkAuthWindow);
+                        
+                        // Simulate verification process
+                        setTimeout(function() {
+                            spinner.style.display = 'none';
+                            detailsModal.querySelector('.success-message').style.display = 'block';
+                            detailsModal.querySelector('.aadhaar-details').style.display = 'block';
+                        }, 2000);
+                    }
+                }, 1000);
+            });
+            
+            // Close details modal
+            closeDetailsBtn.addEventListener('click', function() {
+                detailsModal.style.display = 'none';
+            });
+            
+            // Enhanced 3D effect on cards
+            const cards = document.querySelectorAll('.verification-card');
+            cards.forEach(card => {
+                card.addEventListener('mousemove', (e) => {
+                    const xAxis = (window.innerWidth / 2 - e.pageX) / 25;
+                    const yAxis = (window.innerHeight / 2 - e.pageY) / 25;
+                    card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
+                });
+                
+                card.addEventListener('mouseenter', (e) => {
+                    card.style.transition = 'none';
+                });
+                
+                card.addEventListener('mouseleave', (e) => {
+                    card.style.transition = 'all 0.5s ease';
+                    card.style.transform = 'rotateY(0deg) rotateX(0deg)';
+                });
+            });
+            
+            // Auto-run animation for card
+            aadhaarCard.style.animation = 'cardFloat 6s infinite';
+            
+            // Generate Digilocker authorization URL
+            function getAuthorizationUrl() {
+                const params = {
+                    response_type: 'code',
+                    client_id: 'RD38A71A31',
+                    redirect_uri: 'https://www.pietos.co.in/',
+                    state: 'abc123xyz456',
+                    code_challenge: '2op6e3nwmHwna_7zxV9rba-vSzW6jPCNTPEFQuyWt-M',
+                    code_challenge_method: 'S256'
+                };
+                
+                return 'https://digilocker.meripehchaan.gov.in/public/oauth2/1/authorize?' + 
+                    Object.keys(params).map(key => 
+                        encodeURIComponent(key) + '=' + encodeURIComponent(params[key])
+                    ).join('&');
+            }
+        });
+    </script>
+</body>
+</html>
